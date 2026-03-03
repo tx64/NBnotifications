@@ -53,7 +53,7 @@ async def send_alert(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = messaging.Message(
         notification=messaging.Notification(
-            title='📢 College Update',
+            title='Important',
             body=message_body,
         ),
         topic='all',
@@ -79,3 +79,4 @@ if __name__ == '__main__':
         app.add_handler(CommandHandler("notify", send_alert))
         print("Bot is running...")
         app.run_polling()
+
