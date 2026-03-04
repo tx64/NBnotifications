@@ -6,7 +6,6 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
 from flask import Flask
 from threading import Thread
-import asyncio
 
 # --- 1. THE FAKE WEBSITE (To trick Render) ---
 app_web = Flask('')
@@ -27,6 +26,7 @@ def keep_alive():
 # --- 2. FIREBASE SETUP ---
 firebase_config = os.environ.get("FIREBASE_CREDENTIALS")
 if firebase_config:
+    # Handle potential JSON parsing errors
     try:
         cred_dict = json.loads(firebase_config)
         cred = credentials.Certificate(cred_dict)
@@ -51,22 +51,17 @@ async def send_alert(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message_body = " ".join(context.args)
 
-    # --- CHANGE IS HERE ---
-    # We use 'data' instead of 'notification'.
-    # This forces the Android app to wake up and run your code (saving history).
     message = messaging.Message(
-        data={
-            'title': 'IMPORTANT',
-            'body': message_body,
-            'sent_by': 'Admin' # Optional: You can use this in your app later
-        },
+        notification=messaging.Notification(
+            title='Important',
+            body=message_body,
+        ),
         topic='all',
     )
-    # ----------------------
 
     try:
         response = messaging.send(message)
-        await update.message.reply_text(f"✅ Notification Sent! (Saved to History)")
+        await update.message.reply_text(f"✅ Notification Sent!")
     except Exception as e:
         await update.message.reply_text(f"❌ Error: {e}")
 
